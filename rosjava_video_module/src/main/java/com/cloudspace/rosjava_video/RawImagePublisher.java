@@ -32,6 +32,7 @@ public class RawImagePublisher implements CustomRawImageListener {
     private ChannelBufferOutputStream stream;
     private int quality = -1;
 
+
     public RawImagePublisher(ConnectedNode connectedNode, int quality, String outgoingVideoStreamNode) {
         this.connectedNode = connectedNode;
         this.imagePublisher = connectedNode.newPublisher(outgoingVideoStreamNode, CompressedImage._TYPE);
@@ -45,13 +46,13 @@ public class RawImagePublisher implements CustomRawImageListener {
     }
 
     public RawImagePublisher(ConnectedNode connectedNode, int quality) {
-       this(connectedNode, quality, Constants.NODE_IMAGE_COMPRESSED);
+        this(connectedNode, quality, Constants.NODE_IMAGE_COMPRESSED);
     }
 
     public void onNewRawImage(byte[] data, Size size) {
         Preconditions.checkNotNull(data);
         Preconditions.checkNotNull(size);
-        if(data != this.rawImageBuffer || !size.equals(this.rawImageSize)) {
+        if (data != this.rawImageBuffer || !size.equals(this.rawImageSize)) {
             this.rawImageBuffer = data;
             this.rawImageSize = size;
             this.yuvImage = new YuvImage(this.rawImageBuffer, 17, size.width, size.height, null);

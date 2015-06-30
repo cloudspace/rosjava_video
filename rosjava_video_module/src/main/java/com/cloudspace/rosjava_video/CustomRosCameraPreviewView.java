@@ -18,6 +18,7 @@ public class CustomRosCameraPreviewView extends CustomCameraPreviewView implemen
     public int height = -1;
     private int quality = 20;
     private String topicName = Constants.NODE_CAMERA_PREVIEW;
+    private RawImagePublisher imagePublisher;
 
     @Override
     protected void onSizeChanged(int xNew, int yNew, int xOld, int yOld){
@@ -51,7 +52,8 @@ public class CustomRosCameraPreviewView extends CustomCameraPreviewView implemen
     @Override
     public void onStart(ConnectedNode connectedNode) {
         this.connectedNode = connectedNode;
-        this.setRawImageListener(new RawImagePublisher(connectedNode, quality, topicName));
+        imagePublisher = new RawImagePublisher(connectedNode, quality, topicName);
+        this.setRawImageListener(imagePublisher);
     }
 
     @Override

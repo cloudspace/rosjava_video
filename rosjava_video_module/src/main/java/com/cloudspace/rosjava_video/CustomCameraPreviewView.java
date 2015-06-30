@@ -29,6 +29,22 @@ public class CustomCameraPreviewView extends ViewGroup {
     private CustomRawImageListener rawImageListener;
     private CustomCameraPreviewView.BufferingPreviewCallback bufferingPreviewCallback;
 
+    boolean isPaused = false;
+
+    public void pause() {
+        isPaused = true;
+        if (camera != null) {
+            camera.stopPreview();
+        }
+    }
+
+    public void play() {
+        isPaused = false;
+        if (camera != null) {
+            camera.startPreview();
+        }
+    }
+
     private void init(Context context) {
         SurfaceView surfaceView = new SurfaceView(context);
         this.addView(surfaceView);
@@ -54,8 +70,8 @@ public class CustomCameraPreviewView extends ViewGroup {
     }
 
     public void releaseCamera() {
-        if(this.camera != null) {
-            this.camera.setPreviewCallbackWithBuffer((PreviewCallback)null);
+        if (this.camera != null) {
+            this.camera.setPreviewCallbackWithBuffer((PreviewCallback) null);
             this.camera.stopPreview();
             this.camera.release();
             this.camera = null;
@@ -95,31 +111,31 @@ public class CustomCameraPreviewView extends ViewGroup {
 
     private Size getOptimalPreviewSize(List<Size> sizes, int width, int height) {
         Preconditions.checkNotNull(sizes);
-        double targetRatio = (double)width / (double)height;
+        double targetRatio = (double) width / (double) height;
         double minimumDifference = 1.7976931348623157E308D;
         Size optimalSize = null;
         Iterator i$ = sizes.iterator();
 
         Size size;
-        while(i$.hasNext()) {
-            size = (Size)i$.next();
-            double ratio = (double)size.width / (double)size.height;
-            if(Math.abs(ratio - targetRatio) <= 0.1D && (double)Math.abs(size.height - height) < minimumDifference) {
+        while (i$.hasNext()) {
+            size = (Size) i$.next();
+            double ratio = (double) size.width / (double) size.height;
+            if (Math.abs(ratio - targetRatio) <= 0.1D && (double) Math.abs(size.height - height) < minimumDifference) {
                 optimalSize = size;
-                minimumDifference = (double)Math.abs(size.height - height);
+                minimumDifference = (double) Math.abs(size.height - height);
             }
         }
 
-        if(optimalSize == null) {
+        if (optimalSize == null) {
             minimumDifference = 1.7976931348623157E308D;
             i$ = sizes.iterator();
 
-            while(i$.hasNext()) {
-                size = (Size)i$.next();
-                double diff = (double)Math.abs(size.height - height);
-                if( diff < minimumDifference) {
+            while (i$.hasNext()) {
+                size = (Size) i$.next();
+                double diff = (double) Math.abs(size.height - height);
+                if (diff < minimumDifference) {
                     optimalSize = size;
-                    minimumDifference = (double)Math.abs(size.height - height);
+                    minimumDifference = (double) Math.abs(size.height - height);
                 }
             }
         }
@@ -137,19 +153,19 @@ public class CustomCameraPreviewView extends ViewGroup {
     }
 
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if(changed && this.getChildCount() > 0) {
+        if (changed && this.getChildCount() > 0) {
             View child = this.getChildAt(0);
             int width = r - l;
             int height = b - t;
             int previewWidth = width;
             int previewHeight = height;
-            if(this.previewSize != null) {
+            if (this.previewSize != null) {
                 previewWidth = this.previewSize.width;
                 previewHeight = this.previewSize.height;
             }
 
             int scaledChildHeight;
-            if(width * previewHeight > height * previewWidth) {
+            if (width * previewHeight > height * previewWidth) {
                 scaledChildHeight = previewWidth * height / previewHeight;
                 child.layout((width - scaledChildHeight) / 2, 0, (width + scaledChildHeight) / 2, height);
             } else {
@@ -169,17 +185,16 @@ public class CustomCameraPreviewView extends ViewGroup {
 
         public void surfaceCreated(SurfaceHolder holder) {
             try {
-                if(CustomCameraPreviewView.this.camera != null) {
-                    CustomCameraPreviewView.this.camera.setPreviewDisplay(holder);
+                if (camera != null) {
+                    camera.setPreviewDisplay(holder);
                 }
-
             } catch (IOException var3) {
                 throw new RosRuntimeException(var3);
             }
         }
 
         public void surfaceDestroyed(SurfaceHolder holder) {
-            CustomCameraPreviewView.this.releaseCamera();
+            releaseCamera();
         }
     }
 
@@ -188,13 +203,13 @@ public class CustomCameraPreviewView extends ViewGroup {
         }
 
         public void onPreviewFrame(byte[] data, Camera camera) {
-            Preconditions.checkArgument(camera == CustomCameraPreviewView.this.camera);
-            Preconditions.checkArgument(data == CustomCameraPreviewView.this.previewBuffer);
-            if(CustomCameraPreviewView.this.rawImageListener != null) {
-                CustomCameraPreviewView.this.rawImageListener.onNewRawImage(data, CustomCameraPreviewView.this.previewSize);
+            Preconditions.checkArgument(camera == camera);
+            Preconditions.checkArgument(data == previewBuffer);
+            if (rawImageListener != null) {
+                rawImageListener.onNewRawImage(data, previewSize);
             }
 
-            camera.addCallbackBuffer(CustomCameraPreviewView.this.previewBuffer);
+            camera.addCallbackBuffer(previewBuffer);
         }
     }
 }
